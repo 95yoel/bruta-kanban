@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Skill"
+  short_description: "Manage branches, commits, and pushes safely"
+  default_prompt: "Use $git-skill to create a task branch, commit descriptive changes, and push them."
