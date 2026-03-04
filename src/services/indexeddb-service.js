@@ -1,3 +1,7 @@
+/**
+ * IndexedDbTaskService is the persistence boundary of the app.
+ * The UI only knows it can load and save normalized task objects here.
+ */
 import { createId } from '../core/id.js'
 
 const DATABASE_NAME = 'native-kanban-db'

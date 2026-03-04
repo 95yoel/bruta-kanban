@@ -1,3 +1,7 @@
+/**
+ * Minimal reactive store.
+ * It keeps state in one place and lets UI parts subscribe to changes.
+ */
 export const createStore = initialState => {
   let state = initialState
   const listeners = new Set()

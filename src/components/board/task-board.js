@@ -1,3 +1,7 @@
+/**
+ * TaskBoard renders the visible kanban and translates user interactions
+ * (clicks, drag and drop) into domain events sent through the bus.
+ */
 import { STATUSES } from './task-card.js'
 import { TaskColumn } from './task-column.js'
 

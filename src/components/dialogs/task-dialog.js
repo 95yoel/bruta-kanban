@@ -1,3 +1,7 @@
+/**
+ * TaskDialog owns the create/edit form.
+ * It validates user input, then emits domain events instead of saving directly.
+ */
 import { AppButton } from '../buttons/app-button.js'
 import { createId } from '../../core/id.js'
 import { TextArea } from '../inputs/text-area.js'

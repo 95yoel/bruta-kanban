@@ -1,3 +1,7 @@
+/**
+ * Small event hub built on top of the browser EventTarget API.
+ * Components use this instead of calling each other directly.
+ */
 export class EventBus {
   constructor() {
     this.target = new EventTarget()

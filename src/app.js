@@ -1,9 +1,13 @@
+/**
+ * app.js is now the thin composition root of the application.
+ * Its job is to wire modules together, subscribe to events, and start the UI.
+ * Heavy logic is pushed into core helpers so the entry point stays readable.
+ */
 import { EventBus } from './core/event-bus.js'
-import { createId } from './core/id.js'
+import { loadStoredFilters, saveStoredFilters } from './core/browser-storage.js'
 import { createStore } from './core/store.js'
 import { sanitizeImportedTasks } from './core/task-import.js'
-import { matchesTaskFilters } from './core/task-filters.js'
-import { canTransitionTask } from './core/task-rules.js'
+import { applyTaskMove, createInitialTasks, getNextOrder, getVisibleTasks, normalizeOrdering } from './core/task-state.js'
 import { BoardSummary } from './components/feedback/board-summary.js'
 import { ActivityLog } from './components/feedback/activity-log.js'
 import { ToastNotice } from './components/feedback/toast-notice.js'
@@ -66,28 +70,6 @@ const detailDialog = new TaskDetailDialog({
   store
 })
 
-const loadPersistedFilters = () => {
-  try {
-    const rawValue = window.localStorage.getItem(FILTER_STORAGE_KEY)
-
-    if (!rawValue) {
-      return { query: '', status: '' }
-    }
-
-    const parsed = JSON.parse(rawValue)
-    return {
-      query: typeof parsed.query === 'string' ? parsed.query : '',
-      status: typeof parsed.status === 'string' ? parsed.status : ''
-    }
-  } catch {
-    return { query: '', status: '' }
-  }
-}
-
-const persistFilters = filters => {
-  window.localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters))
-}
-
 const exportTasksAsJson = tasks => {
   const blob = new Blob([JSON.stringify(tasks, null, 2)], { type: 'application/json' })
   const url = window.URL.createObjectURL(blob)
@@ -123,76 +105,6 @@ const updateTasks = nextTasks => {
   store.setState({ tasks: nextTasks })
   schedulePersist(nextTasks)
   syncTimer()
-}
-
-const getNextOrder = tasks => {
-  if (tasks.length === 0) {
-    return 0
-  }
-
-  return Math.max(...tasks.map(task => task.order ?? 0)) + 1
-}
-
-const getVisibleTasks = (tasks, filters) => tasks.filter(task => matchesTaskFilters(task, filters))
-
-const normalizeOrdering = tasks => tasks.map((task, index) => ({
-  ...task,
-  order: Number.isFinite(task.order) ? task.order : index
-}))
-
-const applyTaskMove = (tasks, taskId, nextStatus, targetIndex = null) => {
-  const sourceTask = tasks.find(task => task.id === taskId)
-
-  if (!sourceTask) {
-    return { tasks, moved: false }
-  }
-
-  if (!canTransitionTask(sourceTask.status, nextStatus) && sourceTask.status !== nextStatus) {
-    return { tasks, moved: false }
-  }
-
-  const remainingTasks = tasks.filter(task => task.id !== taskId)
-  const updatedTask = {
-    ...sourceTask,
-    status: nextStatus
-  }
-
-  if (nextStatus === 'en desarrollo' && !updatedTask.startedAt) {
-    updatedTask.startedAt = new Date().toISOString()
-  }
-
-  if (nextStatus === 'completada' && !updatedTask.completedAt) {
-    updatedTask.completedAt = new Date().toISOString()
-  }
-
-  const beforeTarget = []
-  const targetStatusTasks = []
-  const afterTarget = []
-
-  remainingTasks.forEach(task => {
-    if (task.status !== nextStatus) {
-      if (targetStatusTasks.length === 0) {
-        beforeTarget.push(task)
-      } else {
-        afterTarget.push(task)
-      }
-      return
-    }
-
-    targetStatusTasks.push(task)
-  })
-
-  const insertionIndex = targetIndex === null
-    ? targetStatusTasks.length
-    : Math.max(0, Math.min(targetIndex, targetStatusTasks.length))
-
-  targetStatusTasks.splice(insertionIndex, 0, updatedTask)
-
-  const merged = [...beforeTarget, ...targetStatusTasks, ...afterTarget]
-  return {
-    tasks: normalizeOrdering(merged),
-    moved: true
-  }
 }
 
 const hasActiveTasks = tasks => tasks.some(task => task.status === 'en desarrollo')
@@ -236,19 +148,7 @@ const loadTasks = async () => {
   }
 
   store.setState({
-    tasks: normalizeOrdering([
-      {
-        id: createId(),
-        title: 'Definir arquitectura base',
-        description: 'Crear shell inicial del proyecto y dividir responsabilidades',
-        status: 'planificada',
-        createdAt: new Date().toISOString(),
-        startedAt: '',
-        completedAt: '',
-        elapsedSeconds: 0,
-        order: 0
-      }
-    ])
+    tasks: createInitialTasks()
   })
 
   schedulePersist(store.getState().tasks)
@@ -321,7 +221,7 @@ bus.on('filter:update', filters => {
     filters: nextFilters
   })
 
-  persistFilters(nextFilters)
+  saveStoredFilters(FILTER_STORAGE_KEY, nextFilters)
 })
 
 bus.on('task:import', importedTasks => {
@@ -337,7 +237,7 @@ bus.on('task:select', taskId => {
 })
 
 const bootstrap = async () => {
-  const persistedFilters = loadPersistedFilters()
+  const persistedFilters = loadStoredFilters(FILTER_STORAGE_KEY)
 
   store.setState({
     filters: persistedFilters
