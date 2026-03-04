@@ -36,6 +36,23 @@ test('moves a task to another status and keeps ordering stable', () => {
   assert(result.tasks.find(task => task.id === 'a').startedAt !== '', 'Expected startedAt to be filled')
 })
 
+test('reorders within the same status when moving a card downward', () => {
+  const tasks = normalizeOrdering([
+    { id: 'a', title: 'A', description: '', status: 'planificada', elapsedSeconds: 0, order: 0, startedAt: '', completedAt: '' },
+    { id: 'b', title: 'B', description: '', status: 'planificada', elapsedSeconds: 0, order: 1, startedAt: '', completedAt: '' },
+    { id: 'c', title: 'C', description: '', status: 'planificada', elapsedSeconds: 0, order: 2, startedAt: '', completedAt: '' }
+  ])
+
+  // targetIndex is already adjusted by the UI to account for removing the source item
+  const result = applyTaskMove(tasks, 'a', 'planificada', 1)
+  const orderedIds = result.tasks
+    .filter(task => task.status === 'planificada')
+    .map(task => task.id)
+    .join(',')
+
+  assert(orderedIds === 'b,a,c', 'Expected the task to land at the visual drop position')
+})
+
 test('returns a safe next order value for new tasks', () => {
   const nextOrder = getNextOrder([{ order: 2 }, { order: 7 }])
   assert(nextOrder === 8, 'Expected the next order to continue after the highest value')

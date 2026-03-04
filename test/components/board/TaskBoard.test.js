@@ -1,3 +1,4 @@
+import { getAdjustedTargetIndex } from '../../../src/components/board/task-board.js'
 import { TaskCard, formatElapsedTime } from '../../../src/components/board/task-card.js'
 
 const assert = (condition, message) => {
@@ -26,6 +27,16 @@ test('formats elapsed time in minutes and seconds under one day', () => {
 
 test('formats elapsed time in hours over one day', () => {
   assert(formatElapsedTime(90000) === '25h', 'Expected hours format for long durations')
+})
+
+test('adjusts the drop index when reordering downward inside one column', () => {
+  const correctedIndex = getAdjustedTargetIndex([
+    { id: 'task-1' },
+    { id: 'task-2' },
+    { id: 'task-3' }
+  ], 'task-1', 2)
+
+  assert(correctedIndex === 1, 'Expected downward reorder to compensate for removing the dragged task first')
 })
 
 test('renders a task card with title and move buttons', () => {

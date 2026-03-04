@@ -5,6 +5,20 @@
 import { STATUSES } from './task-card.js'
 import { TaskColumn } from './task-column.js'
 
+export const getAdjustedTargetIndex = (visibleTasks, taskId, targetIndex) => {
+  const sourceIndex = visibleTasks.findIndex(task => task.id === taskId)
+
+  if (sourceIndex === -1) {
+    return targetIndex
+  }
+
+  if (targetIndex > sourceIndex) {
+    return targetIndex - 1
+  }
+
+  return targetIndex
+}
+
 export class TaskBoard {
   constructor({ root, bus, store }) {
     this.root = root
@@ -101,6 +115,10 @@ export class TaskBoard {
         event.preventDefault()
         column.classList.remove('board-column--drop-target')
 
+        if (event.target?.closest?.('.js-task-drop-zone')) {
+          return
+        }
+
         const taskId = event.dataTransfer?.getData('text/plain')
         const status = column.dataset.status
 
@@ -125,10 +143,12 @@ export class TaskBoard {
           }
         }
 
+        const correctedIndex = getAdjustedTargetIndex(visibleTasks, taskId, targetIndex)
+
         this.bus.emit('task:move', {
           taskId,
           nextStatus: status,
-          targetIndex
+          targetIndex: correctedIndex
         })
       })
     })
@@ -136,6 +156,7 @@ export class TaskBoard {
     this.root.querySelectorAll('.js-task-drop-zone').forEach(zone => {
       zone.addEventListener('dragover', event => {
         event.preventDefault()
+        event.stopPropagation()
         zone.classList.add('task-drop-zone--active')
       })
 
@@ -145,6 +166,7 @@ export class TaskBoard {
 
       zone.addEventListener('drop', event => {
         event.preventDefault()
+        event.stopPropagation()
         zone.classList.remove('task-drop-zone--active')
 
         const taskId = event.dataTransfer?.getData('text/plain')
@@ -157,10 +179,13 @@ export class TaskBoard {
 
         // Drop zones are explicit insertion points rendered by TaskList,
         // so here we can move directly to the exact target index.
+        const visibleTasks = this.getTasksByStatus(status)
+        const correctedIndex = getAdjustedTargetIndex(visibleTasks, taskId, targetIndex)
+
         this.bus.emit('task:move', {
           taskId,
           nextStatus: status,
-          targetIndex
+          targetIndex: correctedIndex
         })
       })
     })
