@@ -2,6 +2,7 @@ import { EventBus } from './core/event-bus.js'
 import { createStore } from './core/store.js'
 import { canTransitionTask } from './core/task-rules.js'
 import { BoardSummary } from './components/feedback/board-summary.js'
+import { ActivityLog } from './components/feedback/activity-log.js'
 import { ToastNotice } from './components/feedback/toast-notice.js'
 import { IndexedDbTaskService } from './services/indexeddb-service.js'
 import { TaskBoard } from './components/board/task-board.js'
@@ -17,6 +18,7 @@ let persistTimeoutId = null
 const store = createStore({
   tasks: [],
   selectedTaskId: null,
+  history: [],
   filters: {
     query: '',
     status: ''
@@ -26,6 +28,7 @@ const store = createStore({
 const FILTER_STORAGE_KEY = 'native-kanban-filters'
 const boardRoot = document.querySelector('.js-board-section')
 const summaryRoot = document.querySelector('.js-board-summary')
+const activityLogRoot = document.querySelector('.js-activity-log')
 const createDialogRoot = document.querySelector('.js-task-dialog')
 const detailDialogRoot = document.querySelector('.js-task-detail-dialog')
 const filterQueryInput = document.querySelector('.js-filter-query')
@@ -41,6 +44,11 @@ const board = new TaskBoard({
 
 const summary = new BoardSummary({
   root: summaryRoot,
+  store
+})
+
+const activityLog = new ActivityLog({
+  root: activityLogRoot,
   store
 })
 
@@ -86,6 +94,11 @@ const exportTasksAsJson = tasks => {
   anchor.download = 'native-kanban-tasks.json'
   anchor.click()
   window.URL.revokeObjectURL(url)
+}
+
+const addHistoryEntry = entry => {
+  const history = [entry, ...(store.getState().history || [])].slice(0, 5)
+  store.setState({ history })
 }
 
 const persistTasks = async tasks => {
@@ -246,6 +259,7 @@ bus.on('task:create', task => {
     ...currentState.tasks
   ])
   updateTasks(nextTasks)
+  addHistoryEntry(`Tarea creada: ${task.title}`)
   toast.show('Tarea creada')
 })
 
@@ -259,6 +273,7 @@ bus.on('task:move', ({ taskId, nextStatus, targetIndex = null }) => {
   }
 
   updateTasks(moveResult.tasks)
+  addHistoryEntry(`Tarea movida a ${nextStatus}`)
   toast.show(`Tarea movida a ${nextStatus}`)
 })
 
@@ -271,6 +286,7 @@ bus.on('task:update', ({ taskId, title, description }) => {
   ))
 
   updateTasks(nextTasks)
+  addHistoryEntry(`Tarea actualizada: ${title}`)
   toast.show('Tarea actualizada')
 })
 
@@ -286,6 +302,7 @@ bus.on('task:delete', taskId => {
 
   schedulePersist(nextTasks)
   syncTimer()
+  addHistoryEntry('Tarea eliminada')
   toast.show('Tarea eliminada')
 })
 
@@ -305,6 +322,7 @@ bus.on('filter:update', filters => {
 bus.on('task:import', importedTasks => {
   const nextTasks = normalizeOrdering(importedTasks)
   updateTasks(nextTasks)
+  addHistoryEntry(`Importadas ${nextTasks.length} tareas`)
   toast.show('Tareas importadas')
 })
 
@@ -323,6 +341,7 @@ const bootstrap = async () => {
   await loadTasks()
   toast.mount()
   summary.mount()
+  activityLog.mount()
   board.mount()
   createDialog.mount()
   detailDialog.mount()
@@ -335,7 +354,27 @@ const bootstrap = async () => {
     bus.emit('filter:update', { status: event.target.value })
   })
   exportTasksButton.addEventListener('click', () => {
-    exportTasksAsJson(store.getState().tasks)
+    const { tasks, filters } = store.getState()
+    const hasFilters = Boolean(filters.query || filters.status)
+    const exportTasks = hasFilters
+      ? tasks.filter(task => {
+          const normalizedQuery = filters.query.trim().toLowerCase()
+
+          if (filters.status && task.status !== filters.status) {
+            return false
+          }
+
+          if (!normalizedQuery) {
+            return true
+          }
+
+          const haystack = `${task.title} ${task.description}`.toLowerCase()
+          return haystack.includes(normalizedQuery)
+        })
+      : tasks
+
+    exportTasksAsJson(exportTasks)
+    addHistoryEntry(`Exportadas ${exportTasks.length} tareas`)
     toast.show('Exportacion completada')
   })
   importTasksInput.addEventListener('change', async event => {
@@ -351,6 +390,15 @@ const bootstrap = async () => {
 
       if (!Array.isArray(parsed)) {
         throw new Error('Formato no valido')
+      }
+
+      if (store.getState().tasks.length > 0) {
+        const confirmed = window.confirm('La importacion reemplazara las tareas actuales. ¿Continuar?')
+
+        if (!confirmed) {
+          importTasksInput.value = ''
+          return
+        }
       }
 
       bus.emit('task:import', parsed)

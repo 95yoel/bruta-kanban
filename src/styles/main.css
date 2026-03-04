@@ -74,6 +74,33 @@ textarea {
   margin-bottom: var(--space-lg);
 }
 
+.activity-log {
+  margin-bottom: var(--space-lg);
+}
+
+.activity-log__panel {
+  border: var(--line-width) solid var(--line);
+  background: #fff;
+  padding: var(--space-md);
+}
+
+.activity-log__title {
+  margin: 0 0 var(--space-sm);
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.activity-log__list {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.activity-log__item {
+  font-weight: 700;
+}
+
 .summary-card {
   border: var(--line-width) solid var(--line);
   background: #fff;
