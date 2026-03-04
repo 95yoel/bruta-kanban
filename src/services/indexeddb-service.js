@@ -1,9 +1,11 @@
+import { createId } from '../core/id.js'
+
 const DATABASE_NAME = 'native-kanban-db'
 const STORE_NAME = 'tasks'
 const DATABASE_VERSION = 1
 
 const normalizeTask = task => ({
-  id: task?.id ?? crypto.randomUUID(),
+  id: task?.id ?? createId(),
   title: typeof task?.title === 'string' ? task.title : 'Tarea sin titulo',
   description: typeof task?.description === 'string' ? task.description : '',
   status: typeof task?.status === 'string' ? task.status : 'planificada',

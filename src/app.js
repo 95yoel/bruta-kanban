@@ -1,5 +1,8 @@
 import { EventBus } from './core/event-bus.js'
+import { createId } from './core/id.js'
 import { createStore } from './core/store.js'
+import { sanitizeImportedTasks } from './core/task-import.js'
+import { matchesTaskFilters } from './core/task-filters.js'
 import { canTransitionTask } from './core/task-rules.js'
 import { BoardSummary } from './components/feedback/board-summary.js'
 import { ActivityLog } from './components/feedback/activity-log.js'
@@ -130,6 +133,8 @@ const getNextOrder = tasks => {
   return Math.max(...tasks.map(task => task.order ?? 0)) + 1
 }
 
+const getVisibleTasks = (tasks, filters) => tasks.filter(task => matchesTaskFilters(task, filters))
+
 const normalizeOrdering = tasks => tasks.map((task, index) => ({
   ...task,
   order: Number.isFinite(task.order) ? task.order : index
@@ -233,7 +238,7 @@ const loadTasks = async () => {
   store.setState({
     tasks: normalizeOrdering([
       {
-        id: crypto.randomUUID(),
+        id: createId(),
         title: 'Definir arquitectura base',
         description: 'Crear shell inicial del proyecto y dividir responsabilidades',
         status: 'planificada',
@@ -356,22 +361,7 @@ const bootstrap = async () => {
   exportTasksButton.addEventListener('click', () => {
     const { tasks, filters } = store.getState()
     const hasFilters = Boolean(filters.query || filters.status)
-    const exportTasks = hasFilters
-      ? tasks.filter(task => {
-          const normalizedQuery = filters.query.trim().toLowerCase()
-
-          if (filters.status && task.status !== filters.status) {
-            return false
-          }
-
-          if (!normalizedQuery) {
-            return true
-          }
-
-          const haystack = `${task.title} ${task.description}`.toLowerCase()
-          return haystack.includes(normalizedQuery)
-        })
-      : tasks
+    const exportTasks = hasFilters ? getVisibleTasks(tasks, filters) : tasks
 
     exportTasksAsJson(exportTasks)
     addHistoryEntry(`Exportadas ${exportTasks.length} tareas`)
@@ -393,7 +383,7 @@ const bootstrap = async () => {
       }
 
       if (store.getState().tasks.length > 0) {
-        const confirmed = window.confirm('La importacion reemplazara las tareas actuales. ¿Continuar?')
+        const confirmed = window.confirm('La importacion reemplazara las tareas actuales. Continuar?')
 
         if (!confirmed) {
           importTasksInput.value = ''
@@ -401,7 +391,13 @@ const bootstrap = async () => {
         }
       }
 
-      bus.emit('task:import', parsed)
+      const sanitizedTasks = sanitizeImportedTasks(parsed)
+
+      if (sanitizedTasks.length === 0) {
+        throw new Error('Sin tareas validas')
+      }
+
+      bus.emit('task:import', sanitizedTasks)
     } catch {
       toast.show('No se pudo importar el archivo')
     } finally {

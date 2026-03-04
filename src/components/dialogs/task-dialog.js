@@ -1,4 +1,5 @@
 import { AppButton } from '../buttons/app-button.js'
+import { createId } from '../../core/id.js'
 import { TextArea } from '../inputs/text-area.js'
 import { TextInput } from '../inputs/text-input.js'
 
@@ -87,7 +88,7 @@ export class TaskDialog {
         })
       } else {
         this.bus.emit('task:create', {
-          id: crypto.randomUUID(),
+          id: createId(),
           title,
           description,
           status: 'planificada',
