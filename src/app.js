@@ -1,5 +1,7 @@
 import { EventBus } from './core/event-bus.js'
 import { createStore } from './core/store.js'
+import { canTransitionTask } from './core/task-rules.js'
+import { ToastNotice } from './components/feedback/toast-notice.js'
 import { IndexedDbTaskService } from './services/indexeddb-service.js'
 import { TaskBoard } from './components/board/task-board.js'
 import { TaskDialog } from './components/dialogs/task-dialog.js'
@@ -7,6 +9,7 @@ import { TaskDetailDialog } from './components/dialogs/task-detail-dialog.js'
 
 const bus = new EventBus()
 const taskService = new IndexedDbTaskService()
+const toast = new ToastNotice()
 let activeTimerId = null
 let persistTimeoutId = null
 
@@ -119,16 +122,24 @@ bus.on('task:create', task => {
   const currentState = store.getState()
   const nextTasks = [task, ...currentState.tasks]
   updateTasks(nextTasks)
+  toast.show('Tarea creada')
 })
 
 bus.on('task:move', ({ taskId, nextStatus }) => {
   const currentState = store.getState()
+  let moved = false
+
   const nextTasks = currentState.tasks.map(task => {
     if (task.id !== taskId) {
       return task
     }
 
+    if (!canTransitionTask(task.status, nextStatus)) {
+      return task
+    }
+
     const nextTask = { ...task, status: nextStatus }
+    moved = true
 
     if (nextStatus === 'en desarrollo' && !nextTask.startedAt) {
       nextTask.startedAt = new Date().toISOString()
@@ -141,7 +152,13 @@ bus.on('task:move', ({ taskId, nextStatus }) => {
     return nextTask
   })
 
+  if (!moved) {
+    toast.show('Movimiento no permitido')
+    return
+  }
+
   updateTasks(nextTasks)
+  toast.show(`Tarea movida a ${nextStatus}`)
 })
 
 bus.on('task:update', ({ taskId, title, description }) => {
@@ -153,6 +170,7 @@ bus.on('task:update', ({ taskId, title, description }) => {
   ))
 
   updateTasks(nextTasks)
+  toast.show('Tarea actualizada')
 })
 
 bus.on('task:delete', taskId => {
@@ -167,6 +185,7 @@ bus.on('task:delete', taskId => {
 
   schedulePersist(nextTasks)
   syncTimer()
+  toast.show('Tarea eliminada')
 })
 
 bus.on('task:select', taskId => {
@@ -176,6 +195,7 @@ bus.on('task:select', taskId => {
 
 const bootstrap = async () => {
   await loadTasks()
+  toast.mount()
   board.mount()
   createDialog.mount()
   detailDialog.mount()
