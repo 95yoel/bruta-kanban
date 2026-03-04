@@ -179,11 +179,47 @@ textarea {
   gap: var(--space-md);
 }
 
+.task-drop-zone {
+  min-height: 0.5rem;
+  border: 2px dashed transparent;
+}
+
+.task-drop-zone--active {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.5);
+}
+
 .board-column__empty {
   margin: 0;
   padding: var(--space-md);
   border: var(--line-width) dashed var(--line);
   background: rgba(255, 255, 255, 0.6);
+}
+
+.board-empty-filter {
+  border: var(--line-width) solid var(--line);
+  background: #fff;
+  padding: var(--space-xl);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.board-empty-filter__title,
+.board-empty-filter__text {
+  margin: 0;
+}
+
+.app-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.app-import-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .task-card {
@@ -328,6 +364,10 @@ textarea {
   .dialog-footer {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .app-header__actions {
+    width: 100%;
   }
 }
 

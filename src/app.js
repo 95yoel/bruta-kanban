@@ -30,6 +30,8 @@ const createDialogRoot = document.querySelector('.js-task-dialog')
 const detailDialogRoot = document.querySelector('.js-task-detail-dialog')
 const filterQueryInput = document.querySelector('.js-filter-query')
 const filterStatusInput = document.querySelector('.js-filter-status')
+const exportTasksButton = document.querySelector('.js-export-tasks')
+const importTasksInput = document.querySelector('.js-import-tasks')
 
 const board = new TaskBoard({
   root: boardRoot,
@@ -73,6 +75,17 @@ const loadPersistedFilters = () => {
 
 const persistFilters = filters => {
   window.localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters))
+}
+
+const exportTasksAsJson = tasks => {
+  const blob = new Blob([JSON.stringify(tasks, null, 2)], { type: 'application/json' })
+  const url = window.URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+
+  anchor.href = url
+  anchor.download = 'native-kanban-tasks.json'
+  anchor.click()
+  window.URL.revokeObjectURL(url)
 }
 
 const persistTasks = async tasks => {
@@ -289,6 +302,12 @@ bus.on('filter:update', filters => {
   persistFilters(nextFilters)
 })
 
+bus.on('task:import', importedTasks => {
+  const nextTasks = normalizeOrdering(importedTasks)
+  updateTasks(nextTasks)
+  toast.show('Tareas importadas')
+})
+
 bus.on('task:select', taskId => {
   store.setState({ selectedTaskId: taskId })
   detailDialog.open()
@@ -314,6 +333,32 @@ const bootstrap = async () => {
   })
   filterStatusInput.addEventListener('change', event => {
     bus.emit('filter:update', { status: event.target.value })
+  })
+  exportTasksButton.addEventListener('click', () => {
+    exportTasksAsJson(store.getState().tasks)
+    toast.show('Exportacion completada')
+  })
+  importTasksInput.addEventListener('change', async event => {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      return
+    }
+
+    try {
+      const rawContent = await file.text()
+      const parsed = JSON.parse(rawContent)
+
+      if (!Array.isArray(parsed)) {
+        throw new Error('Formato no valido')
+      }
+
+      bus.emit('task:import', parsed)
+    } catch {
+      toast.show('No se pudo importar el archivo')
+    } finally {
+      importTasksInput.value = ''
+    }
   })
   syncTimer()
 }

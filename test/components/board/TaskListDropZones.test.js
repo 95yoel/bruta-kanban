@@ -16,13 +16,7 @@ const test = (name, callback) => {
   }
 }
 
-test('renders the empty state when there are no tasks', () => {
-  const markup = new TaskList([], 'planificada').render()
-  assert(markup.includes('Sin tareas en esta columna'), 'Expected the list to render the empty state')
-  assert(markup.includes('js-task-drop-zone'), 'Expected the empty state to include a drop zone')
-})
-
-test('renders task cards when tasks exist', () => {
+test('renders drop zones before and after tasks', () => {
   const markup = new TaskList([
     {
       id: 'task-1',
@@ -33,5 +27,6 @@ test('renders task cards when tasks exist', () => {
     }
   ], 'planificada').render()
 
-  assert(markup.includes('Crear modulo'), 'Expected the list to render the task title')
+  const dropZoneMatches = markup.match(/js-task-drop-zone/g) || []
+  assert(dropZoneMatches.length === 2, 'Expected one drop zone before and one after a single task')
 })

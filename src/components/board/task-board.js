@@ -126,9 +126,53 @@ export class TaskBoard {
         })
       })
     })
+
+    this.root.querySelectorAll('.js-task-drop-zone').forEach(zone => {
+      zone.addEventListener('dragover', event => {
+        event.preventDefault()
+        zone.classList.add('task-drop-zone--active')
+      })
+
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('task-drop-zone--active')
+      })
+
+      zone.addEventListener('drop', event => {
+        event.preventDefault()
+        zone.classList.remove('task-drop-zone--active')
+
+        const taskId = event.dataTransfer?.getData('text/plain')
+        const status = zone.dataset.status
+        const targetIndex = Number(zone.dataset.targetIndex)
+
+        if (!taskId || !status || Number.isNaN(targetIndex)) {
+          return
+        }
+
+        this.bus.emit('task:move', {
+          taskId,
+          nextStatus: status,
+          targetIndex
+        })
+      })
+    })
   }
 
   render() {
+    const { tasks, filters } = this.store.getState()
+    const hasAnyTasks = tasks.length > 0
+    const hasVisibleTasks = STATUSES.some(status => this.getTasksByStatus(status).length > 0)
+
+    if (hasAnyTasks && !hasVisibleTasks && (filters.query || filters.status)) {
+      this.root.innerHTML = `
+        <div class="board-empty-filter">
+          <p class="board-empty-filter__title">No hay resultados para los filtros actuales</p>
+          <p class="board-empty-filter__text">Prueba a limpiar la busqueda o cambiar el estado seleccionado.</p>
+        </div>
+      `
+      return
+    }
+
     this.root.innerHTML = `
       <div class="board-grid">
         ${STATUSES.map(status => this.renderColumn(status)).join('')}

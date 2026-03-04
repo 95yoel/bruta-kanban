@@ -8,7 +8,7 @@ export class TaskColumn {
   }
 
   renderContent() {
-    return new TaskList(this.tasks).render()
+    return new TaskList(this.tasks, this.status).render()
   }
 
   render() {
