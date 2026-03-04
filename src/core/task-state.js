@@ -1,4 +1,3 @@
-import { createId } from './id.js'
 import { matchesTaskFilters } from './task-filters.js'
 import { canTransitionTask } from './task-rules.js'
 
@@ -11,21 +10,10 @@ export const normalizeOrdering = tasks => tasks.map((task, index) => ({
 }))
 
 /**
- * Create the first demo task used when the database is empty.
+ * Return the initial task set for a brand new board.
+ * The board now starts empty, so the user sees a clean workspace.
  */
-export const createInitialTasks = () => normalizeOrdering([
-  {
-    id: createId(),
-    title: 'Definir arquitectura base',
-    description: 'Crear shell inicial del proyecto y dividir responsabilidades',
-    status: 'planificada',
-    createdAt: new Date().toISOString(),
-    startedAt: '',
-    completedAt: '',
-    elapsedSeconds: 0,
-    order: 0
-  }
-])
+export const createInitialTasks = () => []
 
 /**
  * Get the next order number for a newly created task.

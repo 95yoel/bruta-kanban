@@ -156,8 +156,6 @@ const loadTasks = async () => {
   store.setState({
     tasks: createInitialTasks()
   })
-
-  schedulePersist(store.getState().tasks)
 }
 
 bus.on('task:create', task => {

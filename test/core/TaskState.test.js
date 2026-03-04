@@ -16,12 +16,11 @@ const test = (name, callback) => {
   }
 }
 
-test('creates a valid initial task set for an empty database', () => {
+test('creates an empty initial task set for an empty database', () => {
   const tasks = createInitialTasks()
 
-  assert(tasks.length === 1, 'Expected one initial task')
-  assert(tasks[0].status === 'planificada', 'Expected the initial task to start as planificada')
-  assert(typeof tasks[0].id === 'string' && tasks[0].id.length > 0, 'Expected the initial task to have an id')
+  assert(Array.isArray(tasks), 'Expected the initial task set to be an array')
+  assert(tasks.length === 0, 'Expected no default tasks in a new board')
 })
 
 test('moves a task to another status and keeps ordering stable', () => {
