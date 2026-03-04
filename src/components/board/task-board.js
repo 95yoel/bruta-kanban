@@ -104,10 +104,25 @@ export class TaskBoard {
           return
         }
 
+        const visibleTasks = this.getTasksByStatus(status)
+        const cards = [...column.querySelectorAll('.task-card')]
+        let targetIndex = visibleTasks.length
+
+        for (let index = 0; index < cards.length; index += 1) {
+          const card = cards[index]
+          const box = card.getBoundingClientRect()
+          const midpoint = box.top + box.height / 2
+
+          if (event.clientY < midpoint) {
+            targetIndex = index
+            break
+          }
+        }
+
         this.bus.emit('task:move', {
           taskId,
           nextStatus: status,
-          targetIndex: this.getTasksByStatus(status).length
+          targetIndex
         })
       })
     })

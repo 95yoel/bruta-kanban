@@ -1,6 +1,7 @@
 import { EventBus } from './core/event-bus.js'
 import { createStore } from './core/store.js'
 import { canTransitionTask } from './core/task-rules.js'
+import { BoardSummary } from './components/feedback/board-summary.js'
 import { ToastNotice } from './components/feedback/toast-notice.js'
 import { IndexedDbTaskService } from './services/indexeddb-service.js'
 import { TaskBoard } from './components/board/task-board.js'
@@ -22,7 +23,9 @@ const store = createStore({
   }
 })
 
+const FILTER_STORAGE_KEY = 'native-kanban-filters'
 const boardRoot = document.querySelector('.js-board-section')
+const summaryRoot = document.querySelector('.js-board-summary')
 const createDialogRoot = document.querySelector('.js-task-dialog')
 const detailDialogRoot = document.querySelector('.js-task-detail-dialog')
 const filterQueryInput = document.querySelector('.js-filter-query')
@@ -31,6 +34,11 @@ const filterStatusInput = document.querySelector('.js-filter-status')
 const board = new TaskBoard({
   root: boardRoot,
   bus,
+  store
+})
+
+const summary = new BoardSummary({
+  root: summaryRoot,
   store
 })
 
@@ -44,6 +52,28 @@ const detailDialog = new TaskDetailDialog({
   bus,
   store
 })
+
+const loadPersistedFilters = () => {
+  try {
+    const rawValue = window.localStorage.getItem(FILTER_STORAGE_KEY)
+
+    if (!rawValue) {
+      return { query: '', status: '' }
+    }
+
+    const parsed = JSON.parse(rawValue)
+    return {
+      query: typeof parsed.query === 'string' ? parsed.query : '',
+      status: typeof parsed.status === 'string' ? parsed.status : ''
+    }
+  } catch {
+    return { query: '', status: '' }
+  }
+}
+
+const persistFilters = filters => {
+  window.localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters))
+}
 
 const persistTasks = async tasks => {
   await taskService.saveAll(tasks)
@@ -247,12 +277,16 @@ bus.on('task:delete', taskId => {
 })
 
 bus.on('filter:update', filters => {
+  const nextFilters = {
+    ...store.getState().filters,
+    ...filters
+  }
+
   store.setState({
-    filters: {
-      ...store.getState().filters,
-      ...filters
-    }
+    filters: nextFilters
   })
+
+  persistFilters(nextFilters)
 })
 
 bus.on('task:select', taskId => {
@@ -261,11 +295,20 @@ bus.on('task:select', taskId => {
 })
 
 const bootstrap = async () => {
+  const persistedFilters = loadPersistedFilters()
+
+  store.setState({
+    filters: persistedFilters
+  })
+
   await loadTasks()
   toast.mount()
+  summary.mount()
   board.mount()
   createDialog.mount()
   detailDialog.mount()
+  filterQueryInput.value = persistedFilters.query
+  filterStatusInput.value = persistedFilters.status
   filterQueryInput.addEventListener('input', event => {
     bus.emit('filter:update', { query: event.target.value })
   })
