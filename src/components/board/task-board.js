@@ -112,6 +112,8 @@ export class TaskBoard {
         const cards = [...column.querySelectorAll('.task-card')]
         let targetIndex = visibleTasks.length
 
+        // If the user drops above the midpoint of a card, insert before it.
+        // Otherwise keep scanning until we find the correct visual slot.
         for (let index = 0; index < cards.length; index += 1) {
           const card = cards[index]
           const box = card.getBoundingClientRect()
@@ -153,6 +155,8 @@ export class TaskBoard {
           return
         }
 
+        // Drop zones are explicit insertion points rendered by TaskList,
+        // so here we can move directly to the exact target index.
         this.bus.emit('task:move', {
           taskId,
           nextStatus: status,
@@ -167,6 +171,8 @@ export class TaskBoard {
     const hasAnyTasks = tasks.length > 0
     const hasVisibleTasks = STATUSES.some(status => this.getTasksByStatus(status).length > 0)
 
+    // This special empty state avoids a confusing board where every column
+    // looks empty even though tasks do exist but are hidden by filters.
     if (hasAnyTasks && !hasVisibleTasks && (filters.query || filters.status)) {
       this.root.innerHTML = `
         <div class="board-empty-filter">

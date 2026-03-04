@@ -6,6 +6,8 @@ import { createId } from './id.js'
 
 export const sanitizeImportedTasks = importedTasks => importedTasks
   .filter(task => task && typeof task === 'object')
+  // Every imported item is normalized into the shape the app expects.
+  // This means the rest of the UI can assume a predictable task schema.
   .map((task, index) => ({
     id: typeof task.id === 'string' && task.id.trim() ? task.id : createId(),
     title: typeof task.title === 'string' && task.title.trim() ? task.title.trim() : `Tarea importada ${index + 1}`,

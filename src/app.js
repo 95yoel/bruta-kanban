@@ -95,6 +95,8 @@ const schedulePersist = tasks => {
     clearTimeout(persistTimeoutId)
   }
 
+  // We debounce writes so fast UI actions (drag, typing, quick moves)
+  // do not hammer IndexedDB with a write for every tiny intermediate step.
   persistTimeoutId = setTimeout(() => {
     persistTasks(tasks)
     persistTimeoutId = null
@@ -113,6 +115,8 @@ const syncTimer = () => {
   const { tasks } = store.getState()
 
   if (hasActiveTasks(tasks) && !activeTimerId) {
+    // The timer starts only when at least one task is actively being worked on.
+    // This keeps the app simple and avoids background work when nothing is running.
     activeTimerId = setInterval(() => {
       const currentState = store.getState()
 
@@ -128,6 +132,8 @@ const syncTimer = () => {
           : task
       ))
 
+      // Timer ticks also persist, because elapsed time is user data and should
+      // survive refreshes or browser restarts.
       store.setState({ tasks: nextTasks })
       schedulePersist(nextTasks)
     }, 1000)
@@ -156,6 +162,9 @@ const loadTasks = async () => {
 
 bus.on('task:create', task => {
   const currentState = store.getState()
+
+  // New tasks are inserted with the next order number so the board can keep
+  // a stable explicit order instead of depending on array insertion side effects.
   const nextTasks = normalizeOrdering([
     {
       ...task,
@@ -282,6 +291,8 @@ const bootstrap = async () => {
         throw new Error('Formato no valido')
       }
 
+      // Import is destructive because it replaces the current dataset.
+      // Ask first when the board already contains tasks.
       if (store.getState().tasks.length > 0) {
         const confirmed = window.confirm('La importacion reemplazara las tareas actuales. Continuar?')
 
@@ -293,6 +304,8 @@ const bootstrap = async () => {
 
       const sanitizedTasks = sanitizeImportedTasks(parsed)
 
+      // A file can be valid JSON but still useless for the app.
+      // If nothing survives sanitization, treat it as an invalid import.
       if (sanitizedTasks.length === 0) {
         throw new Error('Sin tareas validas')
       }

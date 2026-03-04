@@ -76,6 +76,11 @@ export const applyTaskMove = (tasks, taskId, nextStatus, targetIndex = null) => 
   const targetStatusTasks = []
   const afterTarget = []
 
+  // We split the array into three logical zones:
+  // 1) items before the target status block
+  // 2) items in the destination column
+  // 3) items after that block
+  // This lets us reinsert the moved task in one predictable place.
   remainingTasks.forEach(task => {
     if (task.status !== nextStatus) {
       if (targetStatusTasks.length === 0) {
@@ -93,6 +98,8 @@ export const applyTaskMove = (tasks, taskId, nextStatus, targetIndex = null) => 
     ? targetStatusTasks.length
     : Math.max(0, Math.min(targetIndex, targetStatusTasks.length))
 
+  // Clamp the insertion index so drag-and-drop cannot place the task outside
+  // the valid bounds of the destination column.
   targetStatusTasks.splice(insertionIndex, 0, updatedTask)
 
   return {
