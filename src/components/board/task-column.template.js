@@ -1,3 +1,7 @@
+/**
+ * Pure HTML template for a board column.
+ * It receives already-rendered inner content so the template stays simple.
+ */
 export const renderTaskColumnLayout = ({ status, count, contentMarkup }) => `
   <section class="board-column js-board-column" data-status="${status}">
     <header class="board-column__header">

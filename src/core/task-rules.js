@@ -1,3 +1,7 @@
+/**
+ * Task state rules define which statuses exist and which moves are legal.
+ * The rest of the app asks this module before allowing transitions.
+ */
 const VALID_STATUSES = ['planificada', 'en desarrollo', 'completada']
 
 const ALLOWED_TRANSITIONS = {

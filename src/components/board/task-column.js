@@ -1,3 +1,7 @@
+/**
+ * TaskColumn renders one kanban column and delegates its internal list
+ * to TaskList so the column stays focused on structure.
+ */
 import { TaskList } from './task-list.js'
 import { renderTaskColumnLayout } from './task-column.template.js'
 

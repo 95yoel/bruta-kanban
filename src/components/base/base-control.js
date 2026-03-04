@@ -1,3 +1,8 @@
+/**
+ * BaseControl stores the common configuration shared by form controls.
+ * Small input-like components inherit from this to avoid repeating labels,
+ * placeholders, and wrapper markup.
+ */
 export class BaseControl {
   constructor(config = {}) {
     this.label = config.label ?? ''

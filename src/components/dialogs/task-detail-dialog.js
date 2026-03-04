@@ -1,3 +1,7 @@
+/**
+ * TaskDetailDialog shows the selected task and exposes secondary actions
+ * such as edit, delete, and mark as completed.
+ */
 import { formatDateTime, formatElapsedTime } from '../../core/formatters.js'
 import { AppButton } from '../buttons/app-button.js'
 import { renderTaskDetailDialogLayout } from './task-detail-dialog.template.js'

@@ -1,3 +1,6 @@
+/**
+ * TextInput renders a standard one-line input field using BaseControl data.
+ */
 import { BaseControl } from '../base/base-control.js'
 
 export class TextInput extends BaseControl {

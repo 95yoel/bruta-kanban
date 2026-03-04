@@ -1,3 +1,7 @@
+/**
+ * Template-only version of the task detail dialog.
+ * It receives already prepared text and action buttons from the dialog class.
+ */
 export const renderTaskDetailDialogLayout = ({
   title,
   description,

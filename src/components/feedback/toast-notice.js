@@ -1,3 +1,7 @@
+/**
+ * ToastNotice shows short-lived feedback messages in the corner of the screen.
+ * It is intentionally simple: one visible message at a time.
+ */
 export class ToastNotice {
   constructor() {
     this.root = null

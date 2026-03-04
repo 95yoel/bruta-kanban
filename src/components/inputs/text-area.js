@@ -1,3 +1,7 @@
+/**
+ * TextArea is the multiline version of the base form control.
+ * It reuses the same wrapper API as the text input.
+ */
 import { BaseControl } from '../base/base-control.js'
 
 export class TextArea extends BaseControl {

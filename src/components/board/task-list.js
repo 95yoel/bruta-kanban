@@ -1,3 +1,7 @@
+/**
+ * TaskList renders the ordered cards inside one column plus the drop zones
+ * used by drag and drop to insert tasks at a precise position.
+ */
 import { TaskCard } from './task-card.js'
 
 export class TaskList {

@@ -1,3 +1,7 @@
+/**
+ * Create a browser-safe UUID-like string without relying on randomUUID.
+ * This uses getRandomValues when available and falls back gracefully.
+ */
 const randomNibble = () => {
   const cryptoApi = globalThis.crypto
 

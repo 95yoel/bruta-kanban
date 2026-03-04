@@ -1,3 +1,7 @@
+/**
+ * BoardSummary shows high-level counters derived from the current store state.
+ * It is a read-only dashboard for quick situational awareness.
+ */
 export class BoardSummary {
   constructor({ root, store }) {
     this.root = root

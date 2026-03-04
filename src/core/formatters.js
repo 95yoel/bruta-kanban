@@ -1,3 +1,7 @@
+/**
+ * Formatting helpers centralize user-facing text formats for time and dates.
+ * This avoids repeating formatting rules across multiple components.
+ */
 export const formatElapsedTime = elapsedSeconds => {
   if (elapsedSeconds < 60) {
     return `${elapsedSeconds}s`

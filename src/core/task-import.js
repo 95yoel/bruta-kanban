@@ -1,3 +1,7 @@
+/**
+ * Clean imported raw JSON items and turn them into safe task objects.
+ * This prevents broken or incomplete files from crashing the app.
+ */
 import { createId } from './id.js'
 
 export const sanitizeImportedTasks = importedTasks => importedTasks

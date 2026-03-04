@@ -1,3 +1,7 @@
+/**
+ * AppButton is a tiny reusable button renderer.
+ * It keeps button markup consistent across the whole interface.
+ */
 export class AppButton {
   constructor(config = {}) {
     this.label = config.label ?? ''

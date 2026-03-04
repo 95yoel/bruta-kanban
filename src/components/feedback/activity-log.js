@@ -1,3 +1,7 @@
+/**
+ * ActivityLog renders a short recent history so the user can see
+ * what happened last without opening another panel.
+ */
 export class ActivityLog {
   constructor({ root, store }) {
     this.root = root

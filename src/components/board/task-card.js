@@ -1,3 +1,7 @@
+/**
+ * TaskCard converts one task object into a visual card with all its actions.
+ * It does not handle events directly; it only prepares the markup.
+ */
 import { AppButton } from '../buttons/app-button.js'
 import { formatElapsedTime } from '../../core/formatters.js'
 import { renderTaskCardLayout } from './task-card.template.js'
