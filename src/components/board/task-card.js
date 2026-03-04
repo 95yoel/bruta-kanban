@@ -20,7 +20,8 @@ export class TaskCard {
       className: 'js-move-task',
       attributes: {
         'data-task-id': this.task.id,
-        'data-next-status': status
+        'data-next-status': status,
+        title: `Mover a ${status}`
       }
     })
 
@@ -37,7 +38,8 @@ export class TaskCard {
       compact: true,
       attributes: {
         'data-task-id': this.task.id,
-        'aria-label': 'Ver detalle'
+        'aria-label': 'Ver detalle',
+        title: 'Ver detalle'
       }
     })
 
@@ -50,7 +52,8 @@ export class TaskCard {
       compact: true,
       attributes: {
         'data-task-id': this.task.id,
-        'aria-label': 'Editar'
+        'aria-label': 'Editar',
+        title: 'Editar'
       }
     })
 
@@ -63,7 +66,8 @@ export class TaskCard {
       compact: true,
       attributes: {
         'data-task-id': this.task.id,
-        'aria-label': 'Eliminar'
+        'aria-label': 'Eliminar',
+        title: 'Eliminar'
       }
     })
 
