@@ -39,6 +39,30 @@ test('adjusts the drop index when reordering downward inside one column', () => 
   assert(correctedIndex === 1, 'Expected downward reorder to compensate for removing the dragged task first')
 })
 
+test('produces the correct index when dropping a card onto the card below it', () => {
+  // Simulates the column handler logic: drop on card at cardIndex=2 (below source
+  // at sourceIndex=1) → targetIndex = cardIndex + 1 = 3, then corrected to 2.
+  const visibleTasks = [{ id: 'a' }, { id: 'b' }, { id: 'c' }]
+  const sourceIndex = visibleTasks.findIndex(task => task.id === 'b') // 1
+  const cardIndex = 2 // the card 'c' that was dropped on
+  const targetIndex = cardIndex > sourceIndex ? cardIndex + 1 : cardIndex // 3
+  const correctedIndex = getAdjustedTargetIndex(visibleTasks, 'b', targetIndex)
+
+  assert(correctedIndex === 2, 'Expected b to land after c when dropped anywhere on c moving downward')
+})
+
+test('produces the correct index when dropping a card onto the card above it', () => {
+  // Simulates the column handler logic: drop on card at cardIndex=0 (above source
+  // at sourceIndex=2) → targetIndex = cardIndex = 0, corrected stays 0.
+  const visibleTasks = [{ id: 'a' }, { id: 'b' }, { id: 'c' }]
+  const sourceIndex = visibleTasks.findIndex(task => task.id === 'c') // 2
+  const cardIndex = 0 // the card 'a' that was dropped on
+  const targetIndex = cardIndex > sourceIndex ? cardIndex + 1 : cardIndex // 0
+  const correctedIndex = getAdjustedTargetIndex(visibleTasks, 'c', targetIndex)
+
+  assert(correctedIndex === 0, 'Expected c to land before a when dropped on a moving upward')
+})
+
 test('renders a task card with title and move buttons', () => {
   const card = new TaskCard({
     id: 'task-1',

@@ -130,16 +130,32 @@ export class TaskBoard {
         const cards = [...column.querySelectorAll('.task-card')]
         let targetIndex = visibleTasks.length
 
-        // If the user drops above the midpoint of a card, insert before it.
-        // Otherwise keep scanning until we find the correct visual slot.
-        for (let index = 0; index < cards.length; index += 1) {
-          const card = cards[index]
-          const box = card.getBoundingClientRect()
-          const midpoint = box.top + box.height / 2
+        // If the drop landed directly on a card, use that card's slot index.
+        // Cards above the source get targetIndex = cardIndex (insert before).
+        // Cards below the source get targetIndex = cardIndex + 1 (insert after).
+        // This avoids the midpoint ambiguity that made downward moves require
+        // the user to drop in the exact lower half of the target card.
+        const droppedOnCard = event.target?.closest?.('.task-card')
 
-          if (event.clientY < midpoint) {
-            targetIndex = index
-            break
+        if (droppedOnCard) {
+          const cardIndex = cards.indexOf(droppedOnCard)
+
+          if (cardIndex !== -1) {
+            const sourceIndex = visibleTasks.findIndex(task => task.id === taskId)
+            targetIndex = cardIndex > sourceIndex ? cardIndex + 1 : cardIndex
+          }
+        } else {
+          // Fallback for drops on the column background (not on any card):
+          // find the insertion slot by comparing clientY to each card midpoint.
+          for (let index = 0; index < cards.length; index += 1) {
+            const card = cards[index]
+            const box = card.getBoundingClientRect()
+            const midpoint = box.top + box.height / 2
+
+            if (event.clientY < midpoint) {
+              targetIndex = index
+              break
+            }
           }
         }
 
