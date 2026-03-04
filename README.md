@@ -41,6 +41,20 @@ Native kanban task manager built only with HTML, CSS, and JavaScript. The goal i
 - Event-driven communication built on top of `EventTarget` and `CustomEvent`
 - UI modules subscribe to state changes and re-render when needed
 
+## Screenshots
+
+| Create task | Task in planning |
+|:-----------:|:----------------:|
+| ![Create task dialog](docs/demo_create_task.png) | ![Task in planning column](docs/demo_plan_task.png) |
+
+| Task in development | Task completed |
+|:-------------------:|:--------------:|
+| ![Task in development column](docs/demo_development_task.png) | ![Task in completed column](docs/demo_completed_task.png) |
+
+| Task detail |
+|:-----------:|
+| ![Task detail dialog](docs/demo_info.png) |
+
 ## Design Philosophy
 
 This project follows a brutalist UI direction: hard edges, clear structure, direct interactions, and no framework abstraction hiding browser behavior.
@@ -169,6 +183,20 @@ Gestor de tareas tipo kanban construido solo con HTML, CSS y JavaScript nativos.
 - Store ligero para el estado global
 - Comunicacion orientada a eventos sobre `EventTarget` y `CustomEvent`
 - Los modulos de UI se suscriben a cambios y se renderizan cuando hace falta
+
+## Capturas de Pantalla
+
+| Crear tarea | Tarea planificada |
+|:-----------:|:-----------------:|
+| ![Dialogo de creacion de tarea](docs/demo_create_task.png) | ![Tarea en columna de planificacion](docs/demo_plan_task.png) |
+
+| Tarea en desarrollo | Tarea completada |
+|:-------------------:|:----------------:|
+| ![Tarea en columna de desarrollo](docs/demo_development_task.png) | ![Tarea en columna de completadas](docs/demo_completed_task.png) |
+
+| Detalle de tarea |
+|:----------------:|
+| ![Dialogo de detalle de tarea](docs/demo_info.png) |
 
 ## Filosofia de Diseno
 
