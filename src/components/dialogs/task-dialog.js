@@ -6,6 +6,7 @@ export class TaskDialog {
   constructor({ root, bus }) {
     this.root = root
     this.bus = bus
+    this.editingTaskId = null
   }
 
   mount() {
@@ -33,6 +34,9 @@ export class TaskDialog {
     `
 
     openButton.addEventListener('click', () => {
+      this.editingTaskId = null
+      form.reset()
+      this.root.querySelector('.dialog-title').textContent = 'Crear tarea'
       this.root.showModal()
     })
 
@@ -51,19 +55,37 @@ export class TaskDialog {
         return
       }
 
-      this.bus.emit('task:create', {
-        id: crypto.randomUUID(),
-        title,
-        description,
-        status: 'planificada',
-        createdAt: new Date().toISOString(),
-        startedAt: '',
-        completedAt: '',
-        elapsedSeconds: 0
-      })
+      if (this.editingTaskId) {
+        this.bus.emit('task:update', {
+          taskId: this.editingTaskId,
+          title,
+          description
+        })
+      } else {
+        this.bus.emit('task:create', {
+          id: crypto.randomUUID(),
+          title,
+          description,
+          status: 'planificada',
+          createdAt: new Date().toISOString(),
+          startedAt: '',
+          completedAt: '',
+          elapsedSeconds: 0
+        })
+      }
 
+      this.editingTaskId = null
       form.reset()
+      this.root.querySelector('.dialog-title').textContent = 'Crear tarea'
       this.root.close()
+    })
+
+    this.bus.on('task:edit-request', task => {
+      this.editingTaskId = task.id
+      this.root.querySelector('.dialog-title').textContent = 'Editar tarea'
+      form.elements.title.value = task.title
+      form.elements.description.value = task.description
+      this.root.showModal()
     })
   }
 }

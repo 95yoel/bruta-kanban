@@ -144,15 +144,10 @@ textarea {
   padding: var(--space-sm);
 }
 
-.task-card__main {
+.task-card__body {
   display: grid;
   gap: var(--space-xs);
-  width: 100%;
-  border: none;
-  background: transparent;
-  padding: 0;
   text-align: left;
-  cursor: pointer;
 }
 
 .task-card__eyebrow,

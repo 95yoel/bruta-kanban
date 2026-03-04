@@ -40,6 +40,9 @@ test('renders a task card with title and move buttons', () => {
   const markup = card.render()
 
   assert(markup.includes('Crear tablero'), 'Expected the card to render the task title')
+  assert(markup.includes('Ver detalle'), 'Expected the card to render a detail action')
+  assert(markup.includes('Editar'), 'Expected the card to render an edit action')
   assert(markup.includes('data-next-status="en desarrollo"'), 'Expected a move action for in-progress status')
+  assert(markup.includes('Eliminar'), 'Expected the card to render a delete action')
   assert(markup.includes('Tiempo: 30s'), 'Expected the elapsed time label')
 })

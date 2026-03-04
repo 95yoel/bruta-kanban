@@ -35,12 +35,28 @@ export class TaskBoard {
       })
     })
 
+    this.root.querySelectorAll('.js-edit-task').forEach(button => {
+      button.addEventListener('click', () => {
+        const task = this.store.getState().tasks.find(item => item.id === button.dataset.taskId)
+
+        if (task) {
+          this.bus.emit('task:edit-request', task)
+        }
+      })
+    })
+
     this.root.querySelectorAll('.js-move-task').forEach(button => {
       button.addEventListener('click', () => {
         this.bus.emit('task:move', {
           taskId: button.dataset.taskId,
           nextStatus: button.dataset.nextStatus
         })
+      })
+    })
+
+    this.root.querySelectorAll('.js-delete-task').forEach(button => {
+      button.addEventListener('click', () => {
+        this.bus.emit('task:delete', button.dataset.taskId)
       })
     })
   }

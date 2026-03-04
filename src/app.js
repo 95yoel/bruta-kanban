@@ -51,6 +51,12 @@ const schedulePersist = tasks => {
   }, 150)
 }
 
+const updateTasks = nextTasks => {
+  store.setState({ tasks: nextTasks })
+  schedulePersist(nextTasks)
+  syncTimer()
+}
+
 const hasActiveTasks = tasks => tasks.some(task => task.status === 'en desarrollo')
 
 const syncTimer = () => {
@@ -112,9 +118,7 @@ const loadTasks = async () => {
 bus.on('task:create', task => {
   const currentState = store.getState()
   const nextTasks = [task, ...currentState.tasks]
-  store.setState({ tasks: nextTasks })
-  schedulePersist(nextTasks)
-  syncTimer()
+  updateTasks(nextTasks)
 })
 
 bus.on('task:move', ({ taskId, nextStatus }) => {
@@ -137,7 +141,30 @@ bus.on('task:move', ({ taskId, nextStatus }) => {
     return nextTask
   })
 
-  store.setState({ tasks: nextTasks })
+  updateTasks(nextTasks)
+})
+
+bus.on('task:update', ({ taskId, title, description }) => {
+  const currentState = store.getState()
+  const nextTasks = currentState.tasks.map(task => (
+    task.id === taskId
+      ? { ...task, title, description }
+      : task
+  ))
+
+  updateTasks(nextTasks)
+})
+
+bus.on('task:delete', taskId => {
+  const currentState = store.getState()
+  const nextTasks = currentState.tasks.filter(task => task.id !== taskId)
+  const nextSelectedTaskId = currentState.selectedTaskId === taskId ? null : currentState.selectedTaskId
+
+  store.setState({
+    tasks: nextTasks,
+    selectedTaskId: nextSelectedTaskId
+  })
+
   schedulePersist(nextTasks)
   syncTimer()
 })
