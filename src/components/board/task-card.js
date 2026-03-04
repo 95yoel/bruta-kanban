@@ -31,27 +31,39 @@ export class TaskCard {
     const openButton = new AppButton({
       label: 'Ver detalle',
       variant: 'ghost',
-      className: 'js-open-task',
+      className: 'js-open-task task-card__action-button',
+      iconSrc: './src/assets/icons/info.svg',
+      iconAlt: '',
+      compact: true,
       attributes: {
-        'data-task-id': this.task.id
+        'data-task-id': this.task.id,
+        'aria-label': 'Ver detalle'
       }
     })
 
     const editButton = new AppButton({
       label: 'Editar',
       variant: 'ghost',
-      className: 'js-edit-task',
+      className: 'js-edit-task task-card__action-button',
+      iconSrc: './src/assets/icons/pencil.png',
+      iconAlt: '',
+      compact: true,
       attributes: {
-        'data-task-id': this.task.id
+        'data-task-id': this.task.id,
+        'aria-label': 'Editar'
       }
     })
 
     const deleteButton = new AppButton({
       label: 'Eliminar',
       variant: 'ghost',
-      className: 'js-delete-task',
+      className: 'js-delete-task task-card__action-button',
+      iconSrc: './src/assets/icons/delete.png',
+      iconAlt: '',
+      compact: true,
       attributes: {
-        'data-task-id': this.task.id
+        'data-task-id': this.task.id,
+        'aria-label': 'Eliminar'
       }
     })
 

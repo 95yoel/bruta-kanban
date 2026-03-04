@@ -286,6 +286,32 @@ textarea {
   text-transform: uppercase;
 }
 
+.button__content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.button__icon {
+  width: 1rem;
+  height: 1rem;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.button-compact {
+  padding: 0.4rem 0.55rem;
+  min-width: 0;
+}
+
+.task-card__action-button .button__label {
+  display: none;
+}
+
+.task-card__action-button .button__content {
+  gap: 0;
+}
+
 .button-primary {
   background: var(--accent-muted);
 }
