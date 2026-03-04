@@ -155,8 +155,9 @@ export class TaskBoard {
 
     this.root.querySelectorAll('.js-task-drop-zone').forEach(zone => {
       zone.addEventListener('dragover', event => {
+        // Do NOT stopPropagation here: the column's dragover must also fire
+        // so it can maintain its drop-target visual state consistently.
         event.preventDefault()
-        event.stopPropagation()
         zone.classList.add('task-drop-zone--active')
       })
 
@@ -165,8 +166,10 @@ export class TaskBoard {
       })
 
       zone.addEventListener('drop', event => {
+        // Do NOT stopPropagation here: the column's drop handler will run next
+        // but will exit early via the closest('.js-task-drop-zone') guard,
+        // making that guard the single authoritative gatekeeper.
         event.preventDefault()
-        event.stopPropagation()
         zone.classList.remove('task-drop-zone--active')
 
         const taskId = event.dataTransfer?.getData('text/plain')
