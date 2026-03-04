@@ -1,4 +1,0 @@
-interface:
-  display_name: "JS Component Tests"
-  short_description: "Write native JS tests for completed components"
-  default_prompt: "Use $js-component-tests to add native JavaScript tests for a completed UI component without installing dependencies."

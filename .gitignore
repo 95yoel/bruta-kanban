@@ -14,3 +14,8 @@ __pycache__/
 .vscode/
 .DS_Store
 Thumbs.db
+
+AGENTS.md
+master_prompt.md
+git-skill/
+js-component-tests/
