@@ -1,4 +1,4 @@
-import { formatElapsedTime } from '../../../src/components/board/task-board.js'
+import { TaskCard, formatElapsedTime } from '../../../src/components/board/task-card.js'
 
 const assert = (condition, message) => {
   if (!condition) {
@@ -26,4 +26,20 @@ test('formats elapsed time in minutes and seconds under one day', () => {
 
 test('formats elapsed time in hours over one day', () => {
   assert(formatElapsedTime(90000) === '25h', 'Expected hours format for long durations')
+})
+
+test('renders a task card with title and move buttons', () => {
+  const card = new TaskCard({
+    id: 'task-1',
+    title: 'Crear tablero',
+    description: 'Montar la primera columna del kanban',
+    status: 'planificada',
+    elapsedSeconds: 30
+  })
+
+  const markup = card.render()
+
+  assert(markup.includes('Crear tablero'), 'Expected the card to render the task title')
+  assert(markup.includes('data-next-status="en desarrollo"'), 'Expected a move action for in-progress status')
+  assert(markup.includes('Tiempo: 30s'), 'Expected the elapsed time label')
 })

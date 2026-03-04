@@ -1,19 +1,5 @@
-const STATUSES = ['planificada', 'en desarrollo', 'completada']
-
-const formatElapsedTime = elapsedSeconds => {
-  if (elapsedSeconds < 60) {
-    return `${elapsedSeconds}s`
-  }
-
-  if (elapsedSeconds < 86400) {
-    const minutes = Math.floor(elapsedSeconds / 60)
-    const seconds = elapsedSeconds % 60
-    return `${minutes}m ${seconds}s`
-  }
-
-  const hours = Math.floor(elapsedSeconds / 3600)
-  return `${hours}h`
-}
+import { STATUSES } from './task-card.js'
+import { TaskColumn } from './task-column.js'
 
 export class TaskBoard {
   constructor({ root, bus, store }) {
@@ -35,47 +21,11 @@ export class TaskBoard {
     return this.store.getState().tasks.filter(task => task.status === status)
   }
 
-  renderTaskCard(task) {
-    return `
-      <article class="task-card">
-        <button class="task-card__main js-open-task" data-task-id="${task.id}" type="button">
-          <span class="task-card__eyebrow">${task.status}</span>
-          <strong class="task-card__title">${task.title}</strong>
-          <span class="task-card__text">${task.description}</span>
-          <span class="task-card__meta">Tiempo: ${formatElapsedTime(task.elapsedSeconds)}</span>
-        </button>
-        <div class="task-card__actions">
-          ${STATUSES.filter(status => status !== task.status).map(status => `
-            <button
-              class="button button-ghost js-move-task"
-              data-task-id="${task.id}"
-              data-next-status="${status}"
-              type="button"
-            >
-              ${status}
-            </button>
-          `).join('')}
-        </div>
-      </article>
-    `
-  }
-
   renderColumn(status) {
-    const tasks = this.getTasksByStatus(status)
-
-    return `
-      <section class="board-column">
-        <header class="board-column__header">
-          <h2 class="board-column__title">${status}</h2>
-          <span class="board-column__count">${tasks.length}</span>
-        </header>
-        <div class="board-column__list">
-          ${tasks.length > 0
-            ? tasks.map(task => this.renderTaskCard(task)).join('')
-            : '<p class="board-column__empty">Sin tareas en esta columna</p>'}
-        </div>
-      </section>
-    `
+    return new TaskColumn({
+      status,
+      tasks: this.getTasksByStatus(status)
+    }).render()
   }
 
   bindEvents() {
@@ -105,5 +55,3 @@ export class TaskBoard {
     this.bindEvents()
   }
 }
-
-export { formatElapsedTime }

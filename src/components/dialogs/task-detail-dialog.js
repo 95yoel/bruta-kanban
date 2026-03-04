@@ -1,4 +1,4 @@
-import { formatElapsedTime } from '../board/task-board.js'
+import { formatElapsedTime } from '../board/task-card.js'
 
 const formatDate = value => {
   if (!value) {

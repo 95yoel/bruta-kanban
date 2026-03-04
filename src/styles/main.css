@@ -40,7 +40,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -219,6 +220,11 @@ input {
   border-radius: var(--radius);
   background: #fff;
   padding: 0.85rem 0.9rem;
+}
+
+.form-field__textarea {
+  min-height: 8rem;
+  resize: vertical;
 }
 
 .detail-row {

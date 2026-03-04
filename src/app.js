@@ -7,6 +7,8 @@ import { TaskDetailDialog } from './components/dialogs/task-detail-dialog.js'
 
 const bus = new EventBus()
 const taskService = new IndexedDbTaskService()
+let activeTimerId = null
+let persistTimeoutId = null
 
 const store = createStore({
   tasks: [],
@@ -38,6 +40,49 @@ const persistTasks = async tasks => {
   await taskService.saveAll(tasks)
 }
 
+const schedulePersist = tasks => {
+  if (persistTimeoutId) {
+    clearTimeout(persistTimeoutId)
+  }
+
+  persistTimeoutId = setTimeout(() => {
+    persistTasks(tasks)
+    persistTimeoutId = null
+  }, 150)
+}
+
+const hasActiveTasks = tasks => tasks.some(task => task.status === 'en desarrollo')
+
+const syncTimer = () => {
+  const { tasks } = store.getState()
+
+  if (hasActiveTasks(tasks) && !activeTimerId) {
+    activeTimerId = setInterval(() => {
+      const currentState = store.getState()
+
+      if (!hasActiveTasks(currentState.tasks)) {
+        clearInterval(activeTimerId)
+        activeTimerId = null
+        return
+      }
+
+      const nextTasks = currentState.tasks.map(task => (
+        task.status === 'en desarrollo'
+          ? { ...task, elapsedSeconds: task.elapsedSeconds + 1 }
+          : task
+      ))
+
+      store.setState({ tasks: nextTasks })
+      schedulePersist(nextTasks)
+    }, 1000)
+  }
+
+  if (!hasActiveTasks(tasks) && activeTimerId) {
+    clearInterval(activeTimerId)
+    activeTimerId = null
+  }
+}
+
 const loadTasks = async () => {
   const tasks = await taskService.getAll()
 
@@ -60,13 +105,16 @@ const loadTasks = async () => {
       }
     ]
   })
+
+  schedulePersist(store.getState().tasks)
 }
 
 bus.on('task:create', task => {
   const currentState = store.getState()
   const nextTasks = [task, ...currentState.tasks]
   store.setState({ tasks: nextTasks })
-  persistTasks(nextTasks)
+  schedulePersist(nextTasks)
+  syncTimer()
 })
 
 bus.on('task:move', ({ taskId, nextStatus }) => {
@@ -90,7 +138,8 @@ bus.on('task:move', ({ taskId, nextStatus }) => {
   })
 
   store.setState({ tasks: nextTasks })
-  persistTasks(nextTasks)
+  schedulePersist(nextTasks)
+  syncTimer()
 })
 
 bus.on('task:select', taskId => {
@@ -98,25 +147,12 @@ bus.on('task:select', taskId => {
   detailDialog.open()
 })
 
-const tickActiveTasks = () => {
-  const currentState = store.getState()
-  const nextTasks = currentState.tasks.map(task => (
-    task.status === 'en desarrollo'
-      ? { ...task, elapsedSeconds: task.elapsedSeconds + 1 }
-      : task
-  ))
-
-  store.setState({ tasks: nextTasks })
-  persistTasks(nextTasks)
-}
-
-setInterval(tickActiveTasks, 1000)
-
 const bootstrap = async () => {
   await loadTasks()
   board.mount()
   createDialog.mount()
   detailDialog.mount()
+  syncTimer()
 }
 
 bootstrap()
