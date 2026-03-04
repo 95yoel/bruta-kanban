@@ -24,5 +24,6 @@ test('normalizes missing task fields with safe defaults', () => {
   assert(task.title === 'Tarea parcial', 'The title should be preserved')
   assert(task.status === 'planificada', 'The status should default to planificada')
   assert(task.elapsedSeconds === 0, 'The elapsed time should default to zero')
+  assert(task.order === 0, 'The task order should default to zero')
   assert(typeof task.id === 'string' && task.id.length > 0, 'The task should receive an id')
 })

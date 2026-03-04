@@ -60,6 +60,23 @@ textarea {
   gap: var(--space-md);
 }
 
+.filter-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.filter-panel__field {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.filter-panel__label {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 .app-header {
   padding-bottom: var(--space-lg);
 }
@@ -96,6 +113,11 @@ textarea {
 .board-column {
   min-height: 24rem;
   padding: var(--space-md);
+}
+
+.board-column--drop-target {
+  outline: var(--line-width) dashed var(--line);
+  outline-offset: 0.25rem;
 }
 
 .board-column:nth-child(1) {
@@ -142,6 +164,7 @@ textarea {
   display: grid;
   gap: var(--space-sm);
   padding: var(--space-sm);
+  cursor: grab;
 }
 
 .task-card__body {
@@ -263,6 +286,10 @@ textarea {
 
 @media (max-width: 980px) {
   .board-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-panel {
     grid-template-columns: 1fr;
   }
 

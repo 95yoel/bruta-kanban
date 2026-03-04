@@ -10,7 +10,8 @@ const normalizeTask = task => ({
   createdAt: typeof task?.createdAt === 'string' ? task.createdAt : new Date().toISOString(),
   startedAt: typeof task?.startedAt === 'string' ? task.startedAt : '',
   completedAt: typeof task?.completedAt === 'string' ? task.completedAt : '',
-  elapsedSeconds: Number.isFinite(task?.elapsedSeconds) ? task.elapsedSeconds : 0
+  elapsedSeconds: Number.isFinite(task?.elapsedSeconds) ? task.elapsedSeconds : 0,
+  order: Number.isFinite(task?.order) ? task.order : 0
 })
 
 export class IndexedDbTaskService {

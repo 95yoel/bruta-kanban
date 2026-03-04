@@ -1,5 +1,5 @@
 export const renderTaskColumnLayout = ({ status, count, contentMarkup }) => `
-  <section class="board-column">
+  <section class="board-column js-board-column" data-status="${status}">
     <header class="board-column__header">
       <h2 class="board-column__title">${status}</h2>
       <span class="board-column__count">${count}</span>

@@ -18,6 +18,7 @@ const test = (name, callback) => {
 
 test('renders the structural layout for a task card', () => {
   const markup = renderTaskCardLayout({
+    id: 'task-1',
     status: 'planificada',
     title: 'Preparar estructura',
     description: 'Separar los bloques del tablero',
@@ -26,6 +27,7 @@ test('renders the structural layout for a task card', () => {
   })
 
   assert(markup.includes('Preparar estructura'), 'The template should render the title')
+  assert(markup.includes('draggable="true"'), 'The template should render drag support')
   assert(markup.includes('Tiempo: 20s'), 'The template should render the time label')
   assert(markup.includes('<button>Ver detalle</button>'), 'The template should include the provided action markup')
 })

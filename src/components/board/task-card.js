@@ -61,6 +61,7 @@ export class TaskCard {
     ].join('')
 
     return renderTaskCardLayout({
+      id: this.task.id,
       status: this.task.status,
       title: this.task.title,
       description: this.task.description,

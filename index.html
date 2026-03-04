@@ -16,6 +16,21 @@
       <button class="button button-primary js-open-create-dialog" type="button">Nueva tarea</button>
     </header>
     <main class="app-main">
+      <section class="filter-panel" aria-label="Filtros del tablero">
+        <label class="filter-panel__field">
+          <span class="filter-panel__label">Buscar</span>
+          <input class="form-field__input js-filter-query" type="search" placeholder="Filtrar por titulo o descripcion">
+        </label>
+        <label class="filter-panel__field">
+          <span class="filter-panel__label">Estado</span>
+          <select class="form-field__input js-filter-status">
+            <option value="">Todos</option>
+            <option value="planificada">Planificada</option>
+            <option value="en desarrollo">En desarrollo</option>
+            <option value="completada">Completada</option>
+          </select>
+        </label>
+      </section>
       <section class="board-section js-board-section" aria-label="Tablero de tareas"></section>
     </main>
   </div>

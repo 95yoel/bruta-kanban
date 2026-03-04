@@ -18,7 +18,24 @@ export class TaskBoard {
   }
 
   getTasksByStatus(status) {
-    return this.store.getState().tasks.filter(task => task.status === status)
+    const { tasks, filters } = this.store.getState()
+    const normalizedQuery = filters.query.trim().toLowerCase()
+
+    return tasks
+      .filter(task => task.status === status)
+      .filter(task => {
+        if (filters.status && task.status !== filters.status) {
+          return false
+        }
+
+        if (!normalizedQuery) {
+          return true
+        }
+
+        const haystack = `${task.title} ${task.description}`.toLowerCase()
+        return haystack.includes(normalizedQuery)
+      })
+      .sort((left, right) => (left.order ?? 0) - (right.order ?? 0))
   }
 
   renderColumn(status) {
@@ -57,6 +74,41 @@ export class TaskBoard {
     this.root.querySelectorAll('.js-delete-task').forEach(button => {
       button.addEventListener('click', () => {
         this.bus.emit('task:delete', button.dataset.taskId)
+      })
+    })
+
+    this.root.querySelectorAll('.task-card[draggable="true"]').forEach(card => {
+      card.addEventListener('dragstart', event => {
+        event.dataTransfer?.setData('text/plain', card.dataset.taskId)
+      })
+    })
+
+    this.root.querySelectorAll('.js-board-column').forEach(column => {
+      column.addEventListener('dragover', event => {
+        event.preventDefault()
+        column.classList.add('board-column--drop-target')
+      })
+
+      column.addEventListener('dragleave', () => {
+        column.classList.remove('board-column--drop-target')
+      })
+
+      column.addEventListener('drop', event => {
+        event.preventDefault()
+        column.classList.remove('board-column--drop-target')
+
+        const taskId = event.dataTransfer?.getData('text/plain')
+        const status = column.dataset.status
+
+        if (!taskId || !status) {
+          return
+        }
+
+        this.bus.emit('task:move', {
+          taskId,
+          nextStatus: status,
+          targetIndex: this.getTasksByStatus(status).length
+        })
       })
     })
   }
