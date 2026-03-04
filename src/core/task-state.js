@@ -90,8 +90,16 @@ export const applyTaskMove = (tasks, taskId, nextStatus, targetIndex = null) => 
   // the valid bounds of the destination column.
   targetStatusTasks.splice(insertionIndex, 0, updatedTask)
 
+  // Reassign sequential order values within the destination column after the
+  // splice. Without this step normalizeOrdering would preserve the old .order
+  // numbers and the sort in getTasksByStatus would undo the reordering.
+  const reorderedStatusTasks = targetStatusTasks.map((task, index) => ({
+    ...task,
+    order: index
+  }))
+
   return {
-    tasks: normalizeOrdering([...beforeTarget, ...targetStatusTasks, ...afterTarget]),
+    tasks: normalizeOrdering([...beforeTarget, ...reorderedStatusTasks, ...afterTarget]),
     moved: true
   }
 }

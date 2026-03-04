@@ -47,10 +47,47 @@ test('reorders within the same status when moving a card downward', () => {
   const result = applyTaskMove(tasks, 'a', 'planificada', 1)
   const orderedIds = result.tasks
     .filter(task => task.status === 'planificada')
+    .sort((x, y) => x.order - y.order)
     .map(task => task.id)
     .join(',')
 
   assert(orderedIds === 'b,a,c', 'Expected the task to land at the visual drop position')
+})
+
+test('reorders within the same status when moving a card downward past the last item', () => {
+  const tasks = normalizeOrdering([
+    { id: 'a', title: 'A', description: '', status: 'planificada', elapsedSeconds: 0, order: 0, startedAt: '', completedAt: '' },
+    { id: 'b', title: 'B', description: '', status: 'planificada', elapsedSeconds: 0, order: 1, startedAt: '', completedAt: '' },
+    { id: 'c', title: 'C', description: '', status: 'planificada', elapsedSeconds: 0, order: 2, startedAt: '', completedAt: '' }
+  ])
+
+  // Dragging B below C: UI calls getAdjustedTargetIndex([A,B,C], B, 3) → returns 2
+  const result = applyTaskMove(tasks, 'b', 'planificada', 2)
+  const orderedIds = result.tasks
+    .filter(task => task.status === 'planificada')
+    .sort((x, y) => x.order - y.order)
+    .map(task => task.id)
+    .join(',')
+
+  assert(orderedIds === 'a,c,b', 'Expected B to land after C when dragged downward')
+})
+
+test('reorders within the same status when moving a card upward', () => {
+  const tasks = normalizeOrdering([
+    { id: 'a', title: 'A', description: '', status: 'planificada', elapsedSeconds: 0, order: 0, startedAt: '', completedAt: '' },
+    { id: 'b', title: 'B', description: '', status: 'planificada', elapsedSeconds: 0, order: 1, startedAt: '', completedAt: '' },
+    { id: 'c', title: 'C', description: '', status: 'planificada', elapsedSeconds: 0, order: 2, startedAt: '', completedAt: '' }
+  ])
+
+  // Dragging C above A: UI calls getAdjustedTargetIndex([A,B,C], C, 0) → targetIndex(0) <= sourceIndex(2), returns 0
+  const result = applyTaskMove(tasks, 'c', 'planificada', 0)
+  const orderedIds = result.tasks
+    .filter(task => task.status === 'planificada')
+    .sort((x, y) => x.order - y.order)
+    .map(task => task.id)
+    .join(',')
+
+  assert(orderedIds === 'c,a,b', 'Expected C to land before A when dragged upward')
 })
 
 test('returns a safe next order value for new tasks', () => {
