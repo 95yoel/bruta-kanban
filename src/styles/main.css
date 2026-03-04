@@ -222,6 +222,14 @@ textarea {
   resize: vertical;
 }
 
+.form-feedback {
+  margin: 0;
+  padding: var(--space-sm);
+  border: var(--line-width) solid var(--line);
+  background: var(--danger);
+  font-weight: 700;
+}
+
 .detail-row {
   display: grid;
   gap: var(--space-xs);

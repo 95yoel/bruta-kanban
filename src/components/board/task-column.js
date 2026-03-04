@@ -1,4 +1,5 @@
 import { TaskCard } from './task-card.js'
+import { renderTaskColumnLayout } from './task-column.template.js'
 
 export class TaskColumn {
   constructor({ status, tasks }) {
@@ -15,16 +16,10 @@ export class TaskColumn {
   }
 
   render() {
-    return `
-      <section class="board-column">
-        <header class="board-column__header">
-          <h2 class="board-column__title">${this.status}</h2>
-          <span class="board-column__count">${this.tasks.length}</span>
-        </header>
-        <div class="board-column__list">
-          ${this.renderContent()}
-        </div>
-      </section>
-    `
+    return renderTaskColumnLayout({
+      status: this.status,
+      count: this.tasks.length,
+      contentMarkup: this.renderContent()
+    })
   }
 }

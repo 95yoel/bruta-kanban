@@ -2,6 +2,17 @@ const DATABASE_NAME = 'native-kanban-db'
 const STORE_NAME = 'tasks'
 const DATABASE_VERSION = 1
 
+const normalizeTask = task => ({
+  id: task?.id ?? crypto.randomUUID(),
+  title: typeof task?.title === 'string' ? task.title : 'Tarea sin titulo',
+  description: typeof task?.description === 'string' ? task.description : '',
+  status: typeof task?.status === 'string' ? task.status : 'planificada',
+  createdAt: typeof task?.createdAt === 'string' ? task.createdAt : new Date().toISOString(),
+  startedAt: typeof task?.startedAt === 'string' ? task.startedAt : '',
+  completedAt: typeof task?.completedAt === 'string' ? task.completedAt : '',
+  elapsedSeconds: Number.isFinite(task?.elapsedSeconds) ? task.elapsedSeconds : 0
+})
+
 export class IndexedDbTaskService {
   async open() {
     return new Promise((resolve, reject) => {
@@ -28,7 +39,7 @@ export class IndexedDbTaskService {
       const store = transaction.objectStore(STORE_NAME)
       const request = store.getAll()
 
-      request.onsuccess = () => resolve(request.result)
+      request.onsuccess = () => resolve(request.result.map(normalizeTask))
       request.onerror = () => reject(request.error)
     })
   }
@@ -45,7 +56,7 @@ export class IndexedDbTaskService {
 
       clearRequest.onsuccess = () => {
         tasks.forEach(task => {
-          store.put(task)
+          store.put(normalizeTask(task))
         })
       }
 
@@ -54,3 +65,5 @@ export class IndexedDbTaskService {
     })
   }
 }
+
+export { normalizeTask }

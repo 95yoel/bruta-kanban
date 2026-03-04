@@ -1,5 +1,6 @@
 import { formatDateTime, formatElapsedTime } from '../../core/formatters.js'
 import { AppButton } from '../buttons/app-button.js'
+import { renderTaskDetailDialogLayout } from './task-detail-dialog.template.js'
 
 export class TaskDetailDialog {
   constructor({ root, bus, store }) {
@@ -35,25 +36,19 @@ export class TaskDetailDialog {
       return
     }
 
-    contentRoot.innerHTML = `
-      <header class="dialog-header">
-        <h2 class="dialog-title">${task.title}</h2>
-        ${new AppButton({ label: 'Cerrar', variant: 'ghost', className: 'js-close-detail-dialog' }).render()}
-      </header>
-      <div class="detail-grid">
-        <p class="detail-row"><span class="detail-label">Descripcion</span>${task.description || 'Sin descripcion'}</p>
-        <p class="detail-row"><span class="detail-label">Estado</span>${task.status}</p>
-        <p class="detail-row"><span class="detail-label">Creada</span>${formatDateTime(task.createdAt)}</p>
-        <p class="detail-row"><span class="detail-label">Inicio</span>${formatDateTime(task.startedAt)}</p>
-        <p class="detail-row"><span class="detail-label">Tiempo</span>${formatElapsedTime(task.elapsedSeconds)}</p>
-        <p class="detail-row"><span class="detail-label">Finalizada</span>${formatDateTime(task.completedAt)}</p>
-      </div>
-      <div class="dialog-footer">
-        ${new AppButton({ label: 'Editar', variant: 'ghost', className: 'js-edit-detail-task' }).render()}
-        ${new AppButton({ label: 'Eliminar', variant: 'ghost', className: 'js-delete-detail-task' }).render()}
-        ${new AppButton({ label: 'Marcar completada', className: 'js-complete-detail-task' }).render()}
-      </div>
-    `
+    contentRoot.innerHTML = renderTaskDetailDialogLayout({
+      title: task.title,
+      description: task.description || 'Sin descripcion',
+      status: task.status,
+      createdAt: formatDateTime(task.createdAt),
+      startedAt: formatDateTime(task.startedAt),
+      elapsedTime: formatElapsedTime(task.elapsedSeconds),
+      completedAt: formatDateTime(task.completedAt),
+      closeButton: new AppButton({ label: 'Cerrar', variant: 'ghost', className: 'js-close-detail-dialog' }).render(),
+      editButton: new AppButton({ label: 'Editar', variant: 'ghost', className: 'js-edit-detail-task' }).render(),
+      deleteButton: new AppButton({ label: 'Eliminar', variant: 'ghost', className: 'js-delete-detail-task' }).render(),
+      completeButton: new AppButton({ label: 'Marcar completada', className: 'js-complete-detail-task' }).render()
+    })
 
     const closeButton = contentRoot.querySelector('.js-close-detail-dialog')
     const editButton = contentRoot.querySelector('.js-edit-detail-task')
